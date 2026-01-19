@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getDocumentArtifact, getDocumentStatus } from "../api/documents";
 import Sidebar from "../components/Sidebar";
-import SummaryView from "../components/SummaryView"; // <--- IMPORT THE NEW COMPONENT
+import SummaryView from "../components/SummaryView";
+import LogicExtractedView from "../components/LogicExtractedView";
+import LoopMapView from "../components/LoopMapView";
+import ValidationReportView from "../components/ValidationReportView";
+import PLCCodeView from "../components/PLCCodeView";
 import { 
   ArrowLeft, FileText, Code, Activity, ShieldCheck, Map, Terminal, Download, Copy, Check 
 } from "lucide-react";
@@ -87,6 +91,22 @@ export default function DocumentDetails() {
         return <SummaryView data={content} />;
     }
     // -----------------------------------------------------
+    // --- NEW LOGIC: Use LogicExtractedView for logic tab ---
+    if (activeTab === 'logic' && typeof content === 'object') {
+        return <LogicExtractedView data={content} />; // <--- 2. Add this block
+    }
+
+    if (activeTab === 'loop_map' && typeof content === 'object') {
+        return <LoopMapView data={content} />; // <--- 2. Add this block
+    }
+
+    if (activeTab === 'validation' && typeof content === 'object') {
+        return <ValidationReportView data={content} />; // <--- 2. Add this block
+    }
+
+    if (activeTab === 'plc_code' && (typeof content === 'string' || typeof content === 'object')) {
+        return <PLCCodeView data={content} />; // <--- 2. Add this block
+    }
 
     // Default JSON Rendering for other object tabs (like Logic/Loop Map if they return JSON)
     if (typeof content === 'object') {
