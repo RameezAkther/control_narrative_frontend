@@ -29,12 +29,16 @@ export default function DocumentDetails() {
   const [docMeta, setDocMeta] = useState({ filename: "Loading..." });
   const [copied, setCopied] = useState(false);
 
-  // Fetch basic metadata
+  // Fetch basic metadata ONCE when component mounts
   useEffect(() => {
-    getDocumentStatus(id).then(res => {
-      if(res.data) setDocMeta(res.data);
-    }).catch(err => console.error(err));
-  }, [id]);
+    if (!id) return;
+    
+    getDocumentStatus(id)
+      .then(res => {
+        if(res.data) setDocMeta(res.data);
+      })
+      .catch(err => console.error("Failed to fetch document metadata", err));
+  }, [id]); // Only refetch if the document ID changes
 
   // Fetch content when tab changes
   useEffect(() => {

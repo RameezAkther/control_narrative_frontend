@@ -9,6 +9,7 @@ export default function DocumentList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const deletedDocs = useRef(new Set()); // Track deleted documents
 
   // Helper: Check if status is final (no need to poll)
   const isFinalStatus = (status) => {
@@ -23,8 +24,10 @@ export default function DocumentList() {
 
   // POLL LOGIC: Run every 5 seconds ONLY if there are active documents
   useEffect(() => {
-    // 1. Identify documents that are still processing
-    const activeDocs = documents.filter(doc => !isFinalStatus(doc.status));
+    // 1. Identify documents that are still processing (excluding deleted ones)
+    const activeDocs = documents.filter(doc => 
+      !isFinalStatus(doc.status) && !deletedDocs.current.has(doc._id)
+    );
 
     // If no active documents, do nothing (stops the polling loop)
     if (activeDocs.length === 0) return;
@@ -37,6 +40,7 @@ export default function DocumentList() {
             const res = await getDocumentStatus(doc._id);
             return { id: doc._id, ...res.data };
           } catch (err) {
+            console.warn(`Failed to fetch status for ${doc._id}`);
             return null;
           }
         })
@@ -104,6 +108,9 @@ export default function DocumentList() {
     e.preventDefault();
     if (!window.confirm("Are you sure you want to delete this document?")) return;
     try {
+      // Mark as deleted before API call to prevent polling
+      deletedDocs.current.add(id);
+      
       await deleteDocument(id);
       if (documents.length === 1 && page > 1) {
         setPage(p => p - 1);
@@ -112,6 +119,8 @@ export default function DocumentList() {
       }
     } catch (error) {
       console.error("Delete failed", error);
+      // Remove from deleted set if deletion failed
+      deletedDocs.current.delete(id);
     }
   };
 

@@ -20,6 +20,7 @@ export default function UploadDocument() {
   const navigate = useNavigate();
   
   const activePolls = useRef(new Set());
+  const deletedDocs = useRef(new Set()); // Track deleted document IDs
   const DEFAULT_TOTAL_STAGES = 16; 
 
   const prettyStatusText = (status) => {
@@ -30,7 +31,7 @@ export default function UploadDocument() {
 
   const isFinalStatus = (status) => {
     const s = status?.toLowerCase() || "";
-    return s === "completed" || s.includes("failed") || s.includes("error");
+    return s.includes("completed") || s.includes("ready") || s.includes("failed") || s.includes("error");
   };
 
   useEffect(() => {
@@ -44,13 +45,12 @@ export default function UploadDocument() {
       setDocuments(docs);
       setTotalPages(res.data.total_pages || 1);
 
-      // Check current statuses and start polling if needed
+      // Start polling only for documents that are not in final status
       docs.forEach(doc => {
-        // We check the map first to see if we already know it's done
-        // We also check the newly fetched doc.status to avoid starting a poll for a finished doc
         const knownStatus = progressMap[doc._id]?.status || doc.status;
         
-        if (!isFinalStatus(knownStatus)) {
+        // Don't poll if already deleted or in final status
+        if (!deletedDocs.current.has(doc._id) && !isFinalStatus(knownStatus)) {
           pollStatus(doc._id);
         }
       });
@@ -62,9 +62,18 @@ export default function UploadDocument() {
   const pollStatus = async (documentId) => {
     // Prevent double polling for same ID
     if (activePolls.current.has(documentId)) return;
+    // Don't poll deleted documents
+    if (deletedDocs.current.has(documentId)) return;
+
     activePolls.current.add(documentId);
 
     const check = async () => {
+      // Check if document was deleted before attempting to fetch
+      if (deletedDocs.current.has(documentId)) {
+        activePolls.current.delete(documentId);
+        return;
+      }
+
       try {
         const res = await getDocumentStatus(documentId);
         
@@ -91,17 +100,18 @@ export default function UploadDocument() {
         const isFinal = isFinalStatus(status);
         
         if (!isFinal) {
-          // Changed from 1500 to 5000 (5 seconds)
+          // Continue polling every 5 seconds until final status is reached
           setTimeout(check, 5000); 
         } else {
+          // Stop polling once final status is reached
           activePolls.current.delete(documentId);
           // If completed, refresh the list to ensure metadata is synced
           if (status === "completed") fetchDocuments(page); 
         }
       } catch (error) {
         console.error(`Error checking status for ${documentId}`, error);
-        // On error, wait 5s then retry (or you could abort)
-        setTimeout(check, 5000);
+        // On error, stop polling (don't retry indefinitely)
+        activePolls.current.delete(documentId);
       }
     };
 
@@ -170,8 +180,19 @@ export default function UploadDocument() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this document?")) return;
-    await deleteDocument(id);
-    fetchDocuments(page);
+    
+    // Mark as deleted before API call to prevent polling
+    deletedDocs.current.add(id);
+    activePolls.current.delete(id);
+    
+    try {
+      await deleteDocument(id);
+      fetchDocuments(page);
+    } catch (error) {
+      console.error("Delete failed", error);
+      // Remove from deleted set if deletion failed
+      deletedDocs.current.delete(id);
+    }
   };
 
   const renderStatus = (docId) => {
@@ -199,7 +220,7 @@ export default function UploadDocument() {
     }
 
     const s = (info.status || "").toLowerCase();
-    const isReady = s === "completed";
+    const isReady = s.includes("completed") || s.includes("ready");
     const isFailed = s.includes("fail") || s.includes("error");
 
     if (isReady) {

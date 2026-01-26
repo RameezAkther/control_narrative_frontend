@@ -9,6 +9,11 @@ export default function Home() {
   const [recentDocs, setRecentDocs] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const isFinalStatus = (status) => {
+    const s = status?.toLowerCase() || "";
+    return s.includes("completed") || s.includes("ready") || s.includes("failed") || s.includes("error");
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -22,12 +27,17 @@ export default function Home() {
         // Get the first 5 documents
         const docs = res.data.documents?.slice(0, 5) || [];
 
-        // Step 2: Fetch status for each document in parallel
-        // We use Promise.all to fetch them all at once rather than one by one
+        // Step 2: Fetch status only for documents that are NOT already in final state
+        // This prevents unnecessary API calls for completed documents
         const docsWithStatus = await Promise.all(
           docs.map(async (doc) => {
             try {
-              // Call the /status/{id} endpoint
+              // If the document is already in a final state, don't fetch status
+              if (isFinalStatus(doc.status)) {
+                return doc;
+              }
+
+              // Call the /status/{id} endpoint only for in-progress documents
               const statusRes = await getDocumentStatus(doc._id);
               
               // Merge the original doc data with the new status data
