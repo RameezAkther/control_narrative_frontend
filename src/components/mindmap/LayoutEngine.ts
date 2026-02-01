@@ -2,7 +2,7 @@ import dagre from "dagre";
 import { type Node, type Edge, Position } from "reactflow";
 
 // Configuration: Adjust these to fit your Card size
-const NODE_WIDTH = 300; // Card width + padding
+const NODE_WIDTH = 320; // Card width + padding (Matched to ControlNode w-[320px])
 const NODE_HEIGHT = 100; // Card height estimate
 const RANK_SEP = 80; // Vertical gap between layers
 const NODE_SEP = 50; // Horizontal gap between nodes
@@ -24,7 +24,6 @@ export const getLayoutedElements = (
 
 	nodes.forEach((node) => {
 		// Use measured dimensions if available, otherwise fallback to estimates
-		// node.width and node.height are populated by ReactFlow after measurement
 		const width = node.width || NODE_WIDTH;
 		const height = node.height || NODE_HEIGHT;
 
@@ -43,6 +42,8 @@ export const getLayoutedElements = (
 		const height = node.height || NODE_HEIGHT;
 
 		// Set handle positions based on layout direction
+		// Vertical (TB): Top -> Bottom
+		// Horizontal (LR): Left -> Right
 		const targetPosition = isHorizontal ? Position.Left : Position.Top;
 		const sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
 

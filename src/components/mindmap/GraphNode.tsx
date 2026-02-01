@@ -9,12 +9,12 @@ const GraphNode = ({
 	targetPosition = Position.Top,
 }: NodeProps<ControlNodeData>) => {
 	return (
-		<div className="relative">
+		<div className="relative group">
 			{/* Target Handle (Incoming) */}
 			<Handle
 				type="target"
 				position={targetPosition}
-				className="w-3 h-3 bg-slate-400 border-2 border-white transition-all duration-300"
+				className="w-3 h-3 bg-slate-400 border-2 border-white transition-all duration-300 z-10"
 			/>
 
 			{/* Main Node UI */}
@@ -24,7 +24,7 @@ const GraphNode = ({
 			<Handle
 				type="source"
 				position={sourcePosition}
-				className="w-3 h-3 bg-blue-500 border-2 border-white transition-all duration-300"
+				className="w-3 h-3 bg-blue-500 border-2 border-white transition-all duration-300 z-10"
 			/>
 		</div>
 	);
