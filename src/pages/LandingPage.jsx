@@ -9,6 +9,8 @@ import {
   ShieldCheck 
 } from "lucide-react";
 
+import logo from "../assets/logo.png";
+
 export default function LandingPage() {
   const { user } = useAuth();
 
@@ -20,7 +22,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="bg-blue-600 p-1.5 rounded-lg">
-              <Bot className="text-white w-6 h-6" />
+              <img src={logo} alt="Logo" className="w-7 h-7 object-contain flex-shrink-0" />
             </div>
             <span className="text-xl font-bold text-gray-900 tracking-tight">CTRL-INTEL</span>
           </div>
@@ -81,6 +83,10 @@ export default function LandingPage() {
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-500" />
                 <span>Instant Extraction</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                <span>Deep Insight on Control Narrative</span>
               </div>
             </div>
           </div>

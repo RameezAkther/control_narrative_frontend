@@ -53,7 +53,7 @@ export default function Sidebar() {
             { to: "/", label: "Home", Icon: Home },
             { to: "/chat", label: "Chat", Icon: MessageSquare },
             { to: "/upload", label: "Upload Docs", Icon: Upload },
-            { to: "/documents", label: "My Documents", Icon: FolderOpen }, // NEW TAB
+            { to: "/documents", label: "My Documents", Icon: FolderOpen },
           ].map(({ to, label, Icon }) => (
             <Link
               key={to}
