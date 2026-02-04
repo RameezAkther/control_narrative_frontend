@@ -33,14 +33,13 @@ const TABS = [
 
 export default function DocumentDetails() {
 	const { id } = useParams();
-	const [activeTab, setActiveTab] = useState("summary"); // Default to summary for better UX?
+	const [activeTab, setActiveTab] = useState("summary");
 	const [content, setContent] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [docMeta, setDocMeta] = useState({ filename: "Loading..." });
 	const [copied, setCopied] = useState(false);
 
-	// Fetch basic metadata ONCE when component mounts
 	useEffect(() => {
 		if (!id) return;
 
@@ -51,11 +50,9 @@ export default function DocumentDetails() {
 			.catch((err) =>
 				console.error("Failed to fetch document metadata", err),
 			);
-	}, [id]); // Only refetch if the document ID changes
+	}, [id]);
 
-	// Fetch content when tab changes
 	useEffect(() => {
-		// Special case: MindMap handles its own fetching
 		if (activeTab === "mindmap") return;
 
 		const fetchContent = async () => {
@@ -77,7 +74,6 @@ export default function DocumentDetails() {
 		fetchContent();
 	}, [id, activeTab]);
 
-	// --- NEW EXPORT FUNCTION ---
 	const handleExport = () => {
 		if (!content) {
 			alert("No content available to export.");
@@ -87,39 +83,26 @@ export default function DocumentDetails() {
 		let exportData = content;
 		let extension = "txt";
 		let mimeType = "text/plain";
-
-		// 1. Determine file format based on content type
 		if (typeof content === "object") {
 			exportData = JSON.stringify(content, null, 2);
 			extension = "json";
 			mimeType = "application/json";
 		} else {
-			// Handle string content types
 			if (activeTab === "markdown") extension = "md";
-			if (activeTab === "plc_code") extension = "st"; // .st for Structured Text
+			if (activeTab === "plc_code") extension = "st";
 		}
-
-		// 2. Create a Blob (a file-like object of immutable raw data)
 		const blob = new Blob([exportData], { type: mimeType });
-
-		// 3. Create a temporary URL for the Blob
 		const url = URL.createObjectURL(blob);
-
-		// 4. Create a hidden link, click it programmatically, then remove it
 		const link = document.createElement("a");
 		link.href = url;
-		// Naming convention: filename_tabName.extension
 		link.download = `${
 			docMeta.filename || "document"
 		}_${activeTab}.${extension}`;
 		document.body.appendChild(link);
 		link.click();
-
-		// 5. Cleanup
 		document.body.removeChild(link);
 		URL.revokeObjectURL(url);
 	};
-	// ---------------------------
 
 	const handleCopy = () => {
 		if (!content) return;
@@ -133,7 +116,6 @@ export default function DocumentDetails() {
 	};
 
 	const renderContent = () => {
-		// Handle MindMap separately as it has its own internal state/loading
 		if (activeTab === "mindmap") {
 			return <MindMapView documentId={id} isFullWidth={true} />;
 		}
@@ -159,33 +141,28 @@ export default function DocumentDetails() {
 		}
 
 		if (!content) return null;
-
-		// --- NEW LOGIC: Use SummaryView for the summary tab ---
 		if (activeTab === "summary" && typeof content === "object") {
 			return <SummaryView data={content} />;
 		}
-		// -----------------------------------------------------
-		// --- NEW LOGIC: Use LogicExtractedView for logic tab ---
 		if (activeTab === "logic" && typeof content === "object") {
-			return <LogicExtractedView data={content} />; // <--- 2. Add this block
+			return <LogicExtractedView data={content} />;
 		}
 
 		if (activeTab === "loop_map" && typeof content === "object") {
-			return <LoopMapView data={content} />; // <--- 2. Add this block
+			return <LoopMapView data={content} />;
 		}
 
 		if (activeTab === "validation" && typeof content === "object") {
-			return <ValidationReportView data={content} />; // <--- 2. Add this block
+			return <ValidationReportView data={content} />;
 		}
 
 		if (
 			activeTab === "plc_code" &&
 			(typeof content === "string" || typeof content === "object")
 		) {
-			return <PLCCodeView data={content} />; // <--- 2. Add this block
+			return <PLCCodeView data={content} />; 
 		}
 
-		// Default JSON Rendering for other object tabs (like Logic/Loop Map if they return JSON)
 		if (typeof content === "object") {
 			return (
 				<div className="bg-gray-900 rounded-xl overflow-hidden shadow-inner">
@@ -210,8 +187,6 @@ export default function DocumentDetails() {
 				</div>
 			);
 		}
-
-		// Markdown / PLC Code (String) Rendering
 		return (
 			<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 				<div className="flex justify-between items-center px-4 py-2 bg-gray-50 border-b border-gray-200">
@@ -242,7 +217,6 @@ export default function DocumentDetails() {
 		<div className="flex h-screen bg-gray-50">
 			<Sidebar />
 			<div className="flex-1 flex flex-col h-screen overflow-hidden">
-				{/* Header */}
 				<div className="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between shrink-0">
 					<div className="flex items-center gap-4">
 						<Link
@@ -265,7 +239,6 @@ export default function DocumentDetails() {
 					</div>
 
 					<div className="flex gap-2">
-						{/* UPDATED BUTTON WITH ONCLICK HANDLER */}
 						<button
 							onClick={handleExport}
 							disabled={!content || loading}
@@ -294,7 +267,6 @@ export default function DocumentDetails() {
 					</div>
 				</div>
 
-				{/* Navigation Bar */}
 				<div className="bg-white border-b border-gray-200 px-8">
 					<div className="flex gap-6 overflow-x-auto no-scrollbar">
 						{TABS.map((tab) => {
@@ -319,7 +291,6 @@ export default function DocumentDetails() {
 					</div>
 				</div>
 
-				{/* Content Area */}
 				<div
 					className={`flex-1 overflow-y-auto bg-gray-50 ${
 						activeTab === "mindmap" ? "p-0" : "p-8"

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { getDocuments } from "../api/documents";
-import { updateChatName, deleteChat } from "../api/chat"; // Import API
-import { Trash2, Edit2, Check, X } from "lucide-react"; // Import Icons
+import { updateChatName, deleteChat } from "../api/chat";
+import { Trash2, Edit2, Check, X } from "lucide-react";
 
 export default function RightSidebar({ 
   chats = [], 
@@ -11,7 +11,7 @@ export default function RightSidebar({
   selectedContextIds, 
   setSelectedContextIds,
   onLoadChat,
-  onRefreshChats // <--- NEW PROP: Callback to reload chat list
+  onRefreshChats
 }) {
   const [documents, setDocuments] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(true);

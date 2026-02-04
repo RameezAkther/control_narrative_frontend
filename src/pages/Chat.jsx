@@ -13,10 +13,8 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [chats, setChats] = useState([]);
   
-  // Selection States
   const [selectedDocs, setSelectedDocs] = useState(new Set());
   const [selectedContextIds, setSelectedContextIds] = useState(new Set());
-  // New: Artifacts State
   const [selectedArtifacts, setSelectedArtifacts] = useState(new Set());
 
   const scrollRef = useRef(null);
@@ -39,7 +37,6 @@ export default function ChatPage() {
      }
   }, [messages]);
 
-  // Reset artifacts if doc count is not 1
   useEffect(() => {
       if (selectedDocs.size !== 1) {
           setSelectedArtifacts(new Set());
@@ -75,16 +72,13 @@ const handleLoadChat = async (id) => {
          
          const loadedMessages = res.data.map(m => ({
              ...m,
-             // CRITICAL FIX: Ensure 'id' exists by falling back to '_id'
              id: m.id || m._id, 
              text: m.content,
              citations: m.citations || [],
              docCount: m.document_ids?.length || 0,
-             mode: m.mode || "RAG" // Load mode from history if available
+             mode: m.mode || "RAG"
          }));
          setMessages(loadedMessages);
-         
-         // Clear context when loading a new chat to prevent mixing
          setSelectedContextIds(new Set());
      } catch (e) {
          console.error("Failed to load chat history", e);
@@ -103,7 +97,6 @@ const handleLoadChat = async (id) => {
                 mode, 
                 document_ids: Array.from(selectedDocs) 
             });
-            // Ensure we grab the ID correctly
             currentChatId = res.data._id || res.data.id; 
             setChatId(currentChatId);
             setChats(prev => [res.data, ...prev]);
@@ -117,14 +110,13 @@ const userMsg = { id: Math.random().toString(36).slice(2), role: 'user', text };
     setIsTyping(true);
 
     try {
-      // CRITICAL FIX: Filter out null/undefined values from context IDs
       const safeContextIds = Array.from(selectedContextIds).filter(id => id);
 
       const payload = {
         message: text,
         mode,
         document_ids: Array.from(selectedDocs),
-        active_context_ids: safeContextIds, // Send clean list
+        active_context_ids: safeContextIds,
         artifacts: Array.from(selectedArtifacts) 
       };
 

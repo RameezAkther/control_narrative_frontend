@@ -9,9 +9,8 @@ export default function DocumentList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const deletedDocs = useRef(new Set()); // Track deleted documents
+  const deletedDocs = useRef(new Set());
 
-  // Helper: Check if status is final (no need to poll)
   const isFinalStatus = (status) => {
     const s = status?.toLowerCase() || "";
     return s.includes("completed") || s.includes("ready") || s.includes("failed") || s.includes("error");
@@ -19,21 +18,15 @@ export default function DocumentList() {
 
   useEffect(() => {
     fetchDocs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // POLL LOGIC: Run every 5 seconds ONLY if there are active documents
   useEffect(() => {
-    // 1. Identify documents that are still processing (excluding deleted ones)
     const activeDocs = documents.filter(doc => 
       !isFinalStatus(doc.status) && !deletedDocs.current.has(doc._id)
     );
-
-    // If no active documents, do nothing (stops the polling loop)
     if (activeDocs.length === 0) return;
 
     const timer = setTimeout(async () => {
-      // 2. Fetch status ONLY for active documents
       const updates = await Promise.all(
         activeDocs.map(async (doc) => {
           try {
@@ -45,43 +38,30 @@ export default function DocumentList() {
           }
         })
       );
-
-      // 3. Update state only if we got valid updates
       setDocuments(prevDocs => 
         prevDocs.map(doc => {
           const update = updates.find(u => u?.id === doc._id);
           if (update) {
-            // Merge new status/stage into existing doc
             return { ...doc, status: update.status, stage: update.stage };
           }
           return doc;
         })
       );
-    }, 5000); // Wait 5 seconds
-
-    // Cleanup timeout on unmount or if documents state changes (reset timer)
+    }, 5000);
     return () => clearTimeout(timer);
   }, [documents]);
 
   const fetchDocs = async () => {
     try {
       setLoading(true);
-      
-      // 1. Fetch the basic list
       const res = await getDocuments(page);
       const basicDocs = res.data.documents || [];
       setTotalPages(res.data.total_pages || 1);
-
-      // 2. Initial Status Check (Optimized)
-      // Only fetch details for docs that look like they are processing or have unknown status
       const mergedDocs = await Promise.all(
         basicDocs.map(async (doc) => {
-          // If the list endpoint already says it's done, skip the extra call
           if (isFinalStatus(doc.status)) {
             return doc;
           }
-
-          // Otherwise, fetch the latest status immediately (so user doesn't wait 5s for first update)
           try {
             const statusRes = await getDocumentStatus(doc._id);
             return {
@@ -108,7 +88,6 @@ export default function DocumentList() {
     e.preventDefault();
     if (!window.confirm("Are you sure you want to delete this document?")) return;
     try {
-      // Mark as deleted before API call to prevent polling
       deletedDocs.current.add(id);
       
       await deleteDocument(id);
@@ -119,7 +98,6 @@ export default function DocumentList() {
       }
     } catch (error) {
       console.error("Delete failed", error);
-      // Remove from deleted set if deletion failed
       deletedDocs.current.delete(id);
     }
   };
@@ -143,8 +121,8 @@ export default function DocumentList() {
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
-      <div className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex-1 p-8 overflow-y-auto flex flex-col">
+        <div className="max-w-7xl mx-auto flex flex-col space-y-6 flex-1 w-full">
             
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Documents</h1>
@@ -152,12 +130,12 @@ export default function DocumentList() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20">
+            <div className="flex-1 flex items-center justify-center">
               <Loader2 className="animate-spin text-blue-600" size={40} />
             </div>
           ) : documents.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-xl border border-gray-200 shadow-sm">
-              <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+              <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
                 <FileText size={32} className="text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900">No documents found</h3>

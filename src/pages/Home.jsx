@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { UploadCloud, FileText, MessageCircle, ArrowRight, Clock } from "lucide-react";
-// 1. Make sure getDocumentStatus is imported
 import { getDocuments, getDocumentStatus } from "../api/documents"; 
 
 export default function Home() {
@@ -19,36 +18,23 @@ export default function Home() {
 
     const load = async () => {
       try {
-        // Step 1: Fetch the list of documents (Metadata only)
         const res = await getDocuments(1);
         
         if (!mounted) return;
-
-        // Get the first 5 documents
         const docs = res.data.documents?.slice(0, 5) || [];
-
-        // Step 2: Fetch status only for documents that are NOT already in final state
-        // This prevents unnecessary API calls for completed documents
         const docsWithStatus = await Promise.all(
           docs.map(async (doc) => {
             try {
-              // If the document is already in a final state, don't fetch status
               if (isFinalStatus(doc.status)) {
                 return doc;
               }
-
-              // Call the /status/{id} endpoint only for in-progress documents
               const statusRes = await getDocumentStatus(doc._id);
-              
-              // Merge the original doc data with the new status data
               return { 
                 ...doc, 
-                status: statusRes.data.status, // e.g., "parsing the document"
-                stage: statusRes.data.stage    // e.g., 2
+                status: statusRes.data.status,
+                stage: statusRes.data.stage
               };
             } catch (err) {
-              // If status fetch fails (e.g., 404), default to "unknown"
-              // avoiding the whole list breaking
               console.warn(`Could not fetch status for ${doc._id}`);
               return { ...doc, status: "unknown" };
             }
@@ -75,7 +61,6 @@ export default function Home() {
       <Sidebar />
 
       <main className="p-6 flex-1">
-        {/* HERO */}
         <section className="relative bg-gradient-to-r from-blue-50 via-white to-purple-50 rounded-xl p-8 overflow-hidden mb-6 shadow-sm">
           <div className="absolute -right-24 -top-12 w-72 h-72 rounded-full bg-gradient-to-br from-blue-200 to-purple-200 opacity-40 transform rotate-45 animate-pulse"></div>
 
@@ -115,7 +100,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* QUICK ACTIONS */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <Link to="/upload" className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-4 hover:shadow-md transition">
             <div className="p-3 rounded-full bg-blue-50 text-blue-600">
@@ -157,7 +141,6 @@ export default function Home() {
           </Link>
         </section>
 
-        {/* RECENT DOCUMENTS */}
         <section className="bg-white rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">Recent Documents</h3>
@@ -185,8 +168,6 @@ export default function Home() {
                       Uploaded: {new Date(d.created_at || d.uploaded_at?.$date || Date.now()).toLocaleString()}
                     </div>
                   </div>
-
-                  {/* Display the Status dynamically */}
                   <div className={`text-xs px-2 py-1 rounded-full border ${
                     d.status === "ready / completed" 
                       ? "bg-green-50 text-green-600 border-green-100" 

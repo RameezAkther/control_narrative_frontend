@@ -5,7 +5,6 @@ import { getDocuments } from "../api/documents";
 import ChangePasswordModal from "../components/ChangePasswordModal";
 import { Mail, User, Shield, FileText } from "lucide-react";
 
-// Curated list of professional avatar images
 const AVATAR_URLS = [
   "https://i.pinimg.com/736x/bf/35/a9/bf35a9040be9155866dabb5818ddd4c3.jpg",
   "https://i.pinimg.com/736x/a0/b9/81/a0b981387dd4fb99fc19798cacaf3c56.jpg",
@@ -26,8 +25,6 @@ export default function Profile() {
     async function loadData() {
       try {
         setLoading(true);
-
-        // Fetch User Data and Document Stats in parallel
         const [userRes, docRes] = await Promise.all([
           API.get("/user/me"),
           getDocuments(1)
@@ -36,8 +33,6 @@ export default function Profile() {
         const user = userRes.data;
         setUserInfo(user);
         setDocCount(docRes.data.total_documents || 0);
-
-        // Deterministic avatar based on email length
         const avatarIndex = (user.email?.length || 0) % AVATAR_URLS.length;
         setAvatar(AVATAR_URLS[avatarIndex]);
 
@@ -73,10 +68,7 @@ export default function Profile() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile Settings</h1>
 
-          {/* Main Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-            
-            {/* Header Row: Avatar + Name + Button */}
             <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8 border-b border-gray-100 pb-8">
               <img 
                 src={avatar} 
@@ -97,10 +89,7 @@ export default function Profile() {
               </button>
             </div>
 
-            {/* Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
-              {/* Left Column: Personal Info */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Personal Information</h3>
                 
@@ -120,8 +109,6 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-
-              {/* Right Column: Stats */}
               <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100 h-fit">
                 <h3 className="text-sm font-bold text-blue-800 mb-4 flex items-center gap-2">
                   <FileText size={16} className="text-blue-600"/> Account Statistics
@@ -145,8 +132,6 @@ export default function Profile() {
             </div>
           </div>
         </div>
-
-        {/* Modal */}
         {showPasswordModal && (
           <ChangePasswordModal
             closeModal={() => setShowPasswordModal(false)}

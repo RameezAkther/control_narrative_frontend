@@ -7,7 +7,6 @@ import {
 	ChevronDown,
 	Sliders,
 } from "lucide-react";
-// IMPORTS: Connecting to the file you just shared
 import {
 	PropertyGrid,
 	ActionRow,
@@ -32,7 +31,6 @@ export interface ControlNodeData {
 		minValue?: number;
 		maxValue?: number;
 		narrativeRef?: string;
-		// Arrays matching your Widgets file interfaces
 		properties?: { label: string; value: string | number }[];
 		actions?: {
 			label: string;
@@ -93,7 +91,7 @@ const StatusChip = ({ status }: { status: ControlNodeData["status"] }) => {
 
 interface ControlNodeProps {
 	data: ControlNodeData;
-	onToggleExpand?: () => void; // Required for React Flow handle updates
+	onToggleExpand?: () => void;
 }
 
 export const ControlNode: React.FC<ControlNodeProps> = ({
@@ -103,11 +101,10 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
 	const [expanded, setExpanded] = useState(false);
 	const [simValue, setSimValue] = useState(data.currentValue || 50);
 
-	// Toggle Handler
 	const handleToggle = (e: React.MouseEvent) => {
-		e.stopPropagation(); // Stop React Flow from selecting the node on click
+		e.stopPropagation();
 		setExpanded(!expanded);
-		if (onToggleExpand) onToggleExpand(); // Notify parent to move handles
+		if (onToggleExpand) onToggleExpand();
 	};
 
 	return (
@@ -117,9 +114,8 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
         /* EXPANDED STATE STYLING */
         ${expanded ? "bg-white border-blue-400 shadow-2xl scale-[1.02] z-50" : "bg-white border-slate-200 shadow-sm z-0"}
       `}
-			style={{ height: "fit-content" }} // Force container to fit content
+			style={{ height: "fit-content" }}
 		>
-			{/* 1. HEADER (Always Visible) */}
 			<button
 				onClick={handleToggle}
 				className="w-full text-left p-5 focus:outline-none relative group"
@@ -143,32 +139,21 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
 					</div>
 					<StatusChip status={data.status} />
 				</div>
-
-				{/* Chevron Animation */}
 				<div
 					className={`flex justify-center mt-2 transition-opacity duration-300 ${expanded ? "opacity-0" : "opacity-100"}`}
 				>
 					<ChevronDown className="w-4 h-4 text-slate-300 group-hover:text-slate-400" />
 				</div>
 			</button>
-
-			{/* 2. EXPANDABLE BODY (The Fix) */}
 			<div
 				style={{
-					// INLINE STYLES OVERRIDE TAILWIND CONFLICTS
 					maxHeight: expanded ? "1200px" : "0px",
 					opacity: expanded ? 1 : 0,
-					overflow: "hidden", // Critical to hide content when collapsed
+					overflow: "hidden",
 					transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
 				}}
 			>
-				{/* UPDATED CONTAINER:
-            1. bg-slate-50: Slight contrast against white header
-            2. rounded-b-[24px]: Matches the parent card curve
-            3. p-6: Increased padding for comfort
-        */}
 				<div className="bg-slate-50 p-6 space-y-5 border-t border-slate-100 rounded-b-[24px]">
-					{/* Simulation Slider */}
 					{data.meta.unit && (
 						<div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
 							<div className="flex justify-between mb-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -191,9 +176,6 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
 							/>
 						</div>
 					)}
-
-					{/* WIDGETS FROM YOUR FILE */}
-					{/* We pass dummy handlers to prevent crashes if 'onClick' is missing in data */}
 					<ActionRow
 						actions={
 							data.meta.actions?.map((a) => ({
