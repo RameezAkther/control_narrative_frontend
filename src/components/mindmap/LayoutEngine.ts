@@ -4,8 +4,8 @@ import { type Node, type Edge, Position } from "reactflow";
 // Configuration: Adjust these to fit your Card size
 const NODE_WIDTH = 320; // Card width + padding (Matched to ControlNode w-[320px])
 const NODE_HEIGHT = 100; // Card height estimate
-const RANK_SEP = 80; // Vertical gap between layers
-const NODE_SEP = 50; // Horizontal gap between nodes
+const RANK_SEP = 150; // Vertical gap between layers
+const NODE_SEP = 150; // Horizontal gap between nodes
 
 export const getLayoutedElements = (
 	nodes: Node[],

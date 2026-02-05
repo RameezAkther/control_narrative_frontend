@@ -5,7 +5,6 @@ import {
 	AlertTriangle,
 	Settings,
 	ChevronDown,
-	Sliders,
 } from "lucide-react";
 import {
 	PropertyGrid,
@@ -28,17 +27,11 @@ export interface ControlNodeData {
 	currentValue?: number;
 	meta: {
 		unit?: string;
+		description?: string;
 		minValue?: number;
 		maxValue?: number;
 		narrativeRef?: string;
 		properties?: { label: string; value: string | number }[];
-		actions?: {
-			label: string;
-			type: "primary" | "danger" | "neutral";
-			icon?: "play" | "stop" | "reset" | "ack";
-		}[];
-		toggles?: { label: string; checked: boolean }[];
-		trendData?: number[];
 	};
 }
 
@@ -99,7 +92,6 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
 	onToggleExpand,
 }) => {
 	const [expanded, setExpanded] = useState(false);
-	const [simValue, setSimValue] = useState(data.currentValue || 50);
 
 	const handleToggle = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -131,7 +123,7 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
 								{data.id}
 								{data.meta?.unit && (
 									<span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold">
-										{simValue} {data.meta.unit}
+										{data.currentValue} {data.meta.unit}
 									</span>
 								)}
 							</p>
@@ -193,7 +185,7 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
 						}
 					/>
 					<PropertyGrid items={data.meta.properties || []} />
-					<Sparkline data={data.meta.trendData || []} />
+					<InfoSection description={data.meta.description || ""} />
 				</div>
 			</div>
 		</div>

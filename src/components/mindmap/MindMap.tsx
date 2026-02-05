@@ -68,7 +68,15 @@ const MindMap: React.FC<MindMapProps> = ({
 		// Perform initial layout with estimates so nodes don't stack at 0,0
 		const { nodes: layoutedNodes, edges: layoutedEdges } =
 			getLayoutedElements(initialNodes, initialEdges, direction);
-		setNodes(layoutedNodes);
+		setNodes(
+			layoutedNodes.map((n) => ({
+				...n,
+				data: {
+					...n.data,
+					__layoutVersion: direction,
+				},
+			})),
+		);
 		setEdges(layoutedEdges);
 	}, [initialNodes, initialEdges, direction, setNodes, setEdges]);
 
@@ -129,7 +137,15 @@ const MindMap: React.FC<MindMapProps> = ({
 						direction,
 					);
 
-				setNodes(layoutedNodes);
+				setNodes(
+					layoutedNodes.map((n) => ({
+						...n,
+						data: {
+							...n.data,
+							__layoutVersion: direction,
+						},
+					})),
+				);
 				// We don't necessarily need to set edges if they didn't change, but dagre might add points?
 				// LayoutEngine currently returns same edges object, so it's fine.
 				setEdges(layoutedEdges);
