@@ -1,15 +1,22 @@
 import React, { memo } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 import { ControlNode, type ControlNodeData } from "./ControlNode";
+import { useUpdateNodeInternals } from "reactflow";
 
 // GraphNode now accepts dynamic position props from the layout engine
 const GraphNode = ({
 	data,
 	sourcePosition = Position.Bottom,
 	targetPosition = Position.Top,
-}: NodeProps<ControlNodeData>) => {
+}: NodeProps<ControlNodeData & { __layoutVersion?: string }>) => {
+	const updateNodeInternals = useUpdateNodeInternals();
+
+	React.useEffect(() => {
+		updateNodeInternals(data.id);
+	}, [data.id, sourcePosition, targetPosition, updateNodeInternals]);
+
 	return (
-		<div className="relative group">
+		<div className="relative group" key={data.__layoutVersion}>
 			{/* Target Handle (Incoming) */}
 			<Handle
 				type="target"

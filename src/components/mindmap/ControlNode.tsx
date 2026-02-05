@@ -5,15 +5,9 @@ import {
 	AlertTriangle,
 	Settings,
 	ChevronDown,
-	Sliders,
 } from "lucide-react";
 // IMPORTS: Connecting to the file you just shared
-import {
-	PropertyGrid,
-	ActionRow,
-	ToggleRow,
-	Sparkline,
-} from "./ControlNodeWidgets";
+import { PropertyGrid, InfoSection } from "./ControlNodeWidgets";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
@@ -29,18 +23,12 @@ export interface ControlNodeData {
 	currentValue?: number;
 	meta: {
 		unit?: string;
+		description?: string;
 		minValue?: number;
 		maxValue?: number;
 		narrativeRef?: string;
 		// Arrays matching your Widgets file interfaces
 		properties?: { label: string; value: string | number }[];
-		actions?: {
-			label: string;
-			type: "primary" | "danger" | "neutral";
-			icon?: "play" | "stop" | "reset" | "ack";
-		}[];
-		toggles?: { label: string; checked: boolean }[];
-		trendData?: number[];
 	};
 }
 
@@ -101,7 +89,6 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
 	onToggleExpand,
 }) => {
 	const [expanded, setExpanded] = useState(false);
-	const [simValue, setSimValue] = useState(data.currentValue || 50);
 
 	// Toggle Handler
 	const handleToggle = (e: React.MouseEvent) => {
@@ -135,7 +122,7 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
 								{data.id}
 								{data.meta?.unit && (
 									<span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold">
-										{simValue} {data.meta.unit}
+										{data.currentValue} {data.meta.unit}
 									</span>
 								)}
 							</p>
@@ -168,50 +155,9 @@ export const ControlNode: React.FC<ControlNodeProps> = ({
             3. p-6: Increased padding for comfort
         */}
 				<div className="bg-slate-50 p-6 space-y-5 border-t border-slate-100 rounded-b-[24px]">
-					{/* Simulation Slider */}
-					{data.meta.unit && (
-						<div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
-							<div className="flex justify-between mb-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
-								<span className="flex items-center gap-1.5">
-									<Sliders className="w-3 h-3" /> Simulate
-								</span>
-								<span className="text-blue-600">
-									{simValue} {data.meta.unit}
-								</span>
-							</div>
-							<input
-								type="range"
-								className="w-full h-1.5 rounded-full bg-slate-100 appearance-none accent-blue-500 cursor-pointer"
-								min={data.meta.minValue || 0}
-								max={data.meta.maxValue || 100}
-								value={simValue}
-								onChange={(e) =>
-									setSimValue(Number(e.target.value))
-								}
-							/>
-						</div>
-					)}
-
 					{/* WIDGETS FROM YOUR FILE */}
-					{/* We pass dummy handlers to prevent crashes if 'onClick' is missing in data */}
-					<ActionRow
-						actions={
-							data.meta.actions?.map((a) => ({
-								...a,
-								onClick: () => console.log("Action:", a.label),
-							})) || []
-						}
-					/>
-					<ToggleRow
-						toggles={
-							data.meta.toggles?.map((t) => ({
-								...t,
-								onToggle: () => console.log("Toggle:", t.label),
-							})) || []
-						}
-					/>
 					<PropertyGrid items={data.meta.properties || []} />
-					<Sparkline data={data.meta.trendData || []} />
+					<InfoSection description={data.meta.description || ""} />
 				</div>
 			</div>
 		</div>
