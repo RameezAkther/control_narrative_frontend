@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import API from '../api/axiosInstance'; // Import your existing axios instance
+import API from '../api/axiosInstance';
 import toast from 'react-hot-toast';
 
 const AxiosInterceptor = ({ children }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth(); // Assuming your AuthContext has a logout function
+  const { logout } = useAuth();
 
   useEffect(() => {
     // 1. Set up the interceptor

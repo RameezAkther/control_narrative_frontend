@@ -9,7 +9,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  FolderOpen // New Icon
+  FolderOpen
 } from "lucide-react";
 
 import logo from "../assets/logo.png";
@@ -21,7 +21,7 @@ export default function Sidebar() {
 
   const navLinkClass = (path) =>
     `flex items-center rounded-md transition-colors ${
-      location.pathname.startsWith(path) && path !== "/" // Modified to handle nested routes like /documents/:id
+      location.pathname.startsWith(path) && path !== "/"
       ? "bg-gray-800 text-white"
       : location.pathname === path 
         ? "bg-gray-800 text-white" 
@@ -53,7 +53,7 @@ export default function Sidebar() {
             { to: "/", label: "Home", Icon: Home },
             { to: "/chat", label: "Chat", Icon: MessageSquare },
             { to: "/upload", label: "Upload Docs", Icon: Upload },
-            { to: "/documents", label: "My Documents", Icon: FolderOpen }, // NEW TAB
+            { to: "/documents", label: "My Documents", Icon: FolderOpen },
           ].map(({ to, label, Icon }) => (
             <Link
               key={to}

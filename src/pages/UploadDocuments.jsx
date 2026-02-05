@@ -4,8 +4,8 @@ import {
 	uploadDocuments,
 	deleteDocument,
 	getDocumentStatus,
-} from "../api/documents"; // Fixed import order
-import Sidebar from "../components/Sidebar"; // Assuming Sidebar is in ../components
+} from "../api/documents";
+import Sidebar from "../components/Sidebar";
 import UploadDropzone from "../components/documents/UploadDropzone";
 import StagingArea from "../components/documents/StagingArea";
 import DocumentList from "../components/documents/DocumentList";
@@ -19,12 +19,9 @@ export default function UploadDocument() {
 	const [progressMap, setProgressMap] = useState({});
 	const [isUploading, setIsUploading] = useState(false);
 
-	// Refs for polling management
 	const activePolls = useRef(new Set());
 	const deletedDocs = useRef(new Set());
 	const DEFAULT_TOTAL_STAGES = 16;
-
-	// --- Logic Helpers ---
 
 	const prettyStatusText = (status) => {
 		if (!status) return "Initializing...";
@@ -42,8 +39,6 @@ export default function UploadDocument() {
 		);
 	};
 
-	// --- Effects ---
-
 	useEffect(() => {
 		fetchDocuments(page);
 	}, [page]);
@@ -55,11 +50,8 @@ export default function UploadDocument() {
 			setDocuments(docs);
 			setTotalPages(res.data.total_pages || 1);
 
-			// Start polling only for documents that are not in final status
 			docs.forEach((doc) => {
 				const knownStatus = progressMap[doc._id]?.status || doc.status;
-
-				// Don't poll if already deleted or in final status
 				if (
 					!deletedDocs.current.has(doc._id) &&
 					!isFinalStatus(knownStatus)
@@ -73,15 +65,12 @@ export default function UploadDocument() {
 	};
 
 	const pollStatus = async (documentId) => {
-		// Prevent double polling for same ID
 		if (activePolls.current.has(documentId)) return;
-		// Don't poll deleted documents
 		if (deletedDocs.current.has(documentId)) return;
 
 		activePolls.current.add(documentId);
 
 		const check = async () => {
-			// Check if document was deleted before attempting to fetch
 			if (deletedDocs.current.has(documentId)) {
 				activePolls.current.delete(documentId);
 				return;
@@ -113,25 +102,19 @@ export default function UploadDocument() {
 				const isFinal = isFinalStatus(status);
 
 				if (!isFinal) {
-					// Continue polling every 5 seconds until final status is reached
 					setTimeout(check, 5000);
 				} else {
-					// Stop polling once final status is reached
 					activePolls.current.delete(documentId);
-					// If completed, refresh the list to ensure metadata is synced
 					if (status === "completed") fetchDocuments(page);
 				}
 			} catch (error) {
 				console.error(`Error checking status for ${documentId}`, error);
-				// On error, stop polling (don't retry indefinitely)
 				activePolls.current.delete(documentId);
 			}
 		};
 
 		check();
 	};
-
-	// --- Handlers ---
 
 	const handleFileSelect = (e) => {
 		if (e.target.files) {
@@ -202,8 +185,6 @@ export default function UploadDocument() {
 
 	const handleDelete = async (id) => {
 		if (!window.confirm("Delete this document?")) return;
-
-		// Mark as deleted before API call to prevent polling
 		deletedDocs.current.add(id);
 		activePolls.current.delete(id);
 
@@ -212,7 +193,6 @@ export default function UploadDocument() {
 			fetchDocuments(page);
 		} catch (error) {
 			console.error("Delete failed", error);
-			// Remove from deleted set if deletion failed
 			deletedDocs.current.delete(id);
 		}
 	};

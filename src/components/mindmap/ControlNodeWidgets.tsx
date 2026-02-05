@@ -1,7 +1,7 @@
 import React from "react";
 
 /* -------------------------------------------------------------------------- */
-/* 1. PROPERTY GRID                            */
+/* 1. PROPERTY GRID                                                           */
 /* -------------------------------------------------------------------------- */
 // Use this for: Setpoints, Capacities, Timers, Counters, Last Maintenance Dates
 

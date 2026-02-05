@@ -13,29 +13,24 @@ import AxiosInterceptor from "./components/AxiosInterceptor";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
-
 export default function App() {
   return (
     <BrowserRouter>
     <Toaster position="top-right" />
     <AxiosInterceptor>
       <Routes>
-        {/* Public Landing */}
         <Route path="/landing" element={<LandingPage />} />
-
-        {/* Auth Pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={
+        <Route path="/" element={<Navigate to="/landing" replace />} />
+        <Route 
+          path="/profile"
+          element={
           <ProtectedRoute>
             <Profile />
           </ProtectedRoute>
         } />
 
-        {/* Default Route → Landing */}
-        <Route path="/" element={<Navigate to="/landing" replace />} />
-
-        {/* Protected Home Dashboard */}
         <Route
           path="/home"
           element={
@@ -44,6 +39,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/upload"
           element={
@@ -61,6 +57,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/documents"
           element={
@@ -69,6 +66,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/documents/:id"
           element={

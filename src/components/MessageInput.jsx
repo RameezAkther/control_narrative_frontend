@@ -16,8 +16,8 @@ export default function MessageInput({
   setMode, 
   selectedDocsCount, 
   selectedContextCount,
-  selectedArtifacts,      // New Prop
-  setSelectedArtifacts    // New Prop
+  selectedArtifacts,
+  setSelectedArtifacts
 }) {
   const [text, setText] = useState("");
 
